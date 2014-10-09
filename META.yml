@@ -1,0 +1,27 @@
+---
+abstract: "interface to Joker's Domain Management API"
+author:
+  - 'David Precious <davidp@preshweb.co.uk>'
+build_requires:
+  Test::More: 0
+configure_requires:
+  ExtUtils::MakeMaker: 0
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 6.82, CPAN::Meta::Converter version 2.120351'
+license: unknown
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Net-Joker-DMAPI
+no_index:
+  directory:
+    - t
+    - inc
+requires:
+  DateTime: 0
+  Hash::Merge: 0
+  LWP::UserAgent: 0
+  Moose: 0
+  URI: 0
+  perl: 5.01
+version: 0.01

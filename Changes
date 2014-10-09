@@ -1,0 +1,8 @@
+Revision history for Net-Joker-DMAPI
+
+0.01    2014-10-09
+        First version released.  Works well enough to send arbitrary queries to
+        the API, and whois querying and parsing works well, but needs lots more
+        work - more methods to handle common operations (rather than having to
+        go lower level and use do_query(), and a test suite.
+
