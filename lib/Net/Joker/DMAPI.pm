@@ -1,6 +1,6 @@
 package Net::Joker::DMAPI;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 use strict;
 use 5.010;
 use DateTime;
@@ -166,7 +166,7 @@ sub login {
     # If we've already logged in, we're fine
     # TODO: do we need to test the auth-sid is still valid?
     if (!$self->has_auth_sid) {
-        $self->debug_output("Already have auth_sid, no need to log in");
+        $self->_debug_output("Already have auth_sid, no need to log in");
         return 1;
     }
 
@@ -211,8 +211,8 @@ you'll then need to use to poll for the result.
 sub do_request {
     my ($self, $method, $params) = @_;
 
-    my $url = $self->form_request_url($method, $params);
-    $self->debug_output("Calling $method - URL: $url");
+    my $url = $self->_form_request_url($method, $params);
+    $self->_debug_output("Calling $method - URL: $url");
     my $response = $self->ua->get($url);
 
     if (!$response->is_success) {
@@ -239,8 +239,8 @@ sub do_request {
 
         $self->balance($headers{'Account-Balance'});
         $self->auth_sid($headers{'Auth-Sid'}) if $headers{'Auth-Sid'};
-        $self->debug_output("Response status " . $response->status_line);
-        $self->debug_output("Response body: " . $content);
+        $self->_debug_output("Response status " . $response->status_line);
+        $self->_debug_output("Response body: " . $content);
         return $body;
     };
 }
@@ -297,7 +297,7 @@ sub expiry_date {
 }
 
 # Given a method name and parameters, return the appropriate URL for the request
-sub form_request_url {
+sub _form_request_url {
     my ($self, $method, $args) = @_;
     my $uri = URI->new($self->dmapi_url . "/$method");
     $uri->query_form({ 'auth-sid' => $self->auth_sid, %$args });
@@ -305,7 +305,7 @@ sub form_request_url {
 }
 
 # Emit debug info, if $self
-sub debug_output {
+sub _debug_output {
     my ($self, $message) = @_;
     say "DEBUG: $message" if $self->debug;
 }

@@ -24,4 +24,4 @@ requires:
   Moose: 0
   URI: 0
   perl: 5.01
-version: 0.01
+version: 0.02

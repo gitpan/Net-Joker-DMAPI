@@ -1,5 +1,9 @@
 Revision history for Net-Joker-DMAPI
 
+0.02    2014-10-09
+        Bah - POD coverage tests failed because of a couple of undocumented
+        methods which ought to have been private.  They are now.
+
 0.01    2014-10-09
         First version released.  Works well enough to send arbitrary queries to
         the API, and whois querying and parsing works well, but needs lots more
