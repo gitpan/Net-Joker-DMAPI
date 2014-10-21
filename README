@@ -36,7 +36,10 @@ ATTRIBUTES
 
     debug
         Whether to omit debug messages; disabled by default, set to a true
-        value to enable.
+        value to enable. See also the `logger' attribute to which you can
+        provide a coderef which will be called with messages. If `debug' is
+        true, all messages will be output to STDOUT as well as passed to the
+        `logger' coderef (if provided).
 
     ua  An LWP::UserAgent object to use. One is constructed by default, so
         you don't need to supply this unless you have a specific need to do
@@ -57,6 +60,14 @@ ATTRIBUTES
         after login; it's recommended you access it via the `available_tlds'
         method (see below) though, which will call `login' for you first
         then return the list.
+
+    logger
+        A coderef to be used to log interactions with Joker; if this is
+        defined, the coderef provided is called with the log messages, so
+        you can log them however your application usually does.
+
+        The coderef will be called with two parameters - the log level
+        (`debug', `info', `error'), and the message.
 
 METHODS
     login
@@ -123,4 +134,12 @@ LICENSE AND COPYRIGHT
     by the Free Software Foundation; or the Artistic License.
 
     See http://dev.perl.org/licenses/ for more information.
+
+SEE ALSO
+    Joker's DMAPI documentation is at:
+    https://joker.com/faq/category/39/22-dmapi.html
+
+    WWW::Domain::Registry::Joker is another module for talking to Joker's
+    DMAPI, but hasn't been updated for some time and doesn't provide any
+    convenient methods or parsing of responses, just the basics.
 

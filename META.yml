@@ -18,10 +18,11 @@ no_index:
     - t
     - inc
 requires:
+  Data::Censor: 0
   DateTime: 0
   Hash::Merge: 0
   LWP::UserAgent: 0
   Moose: 0
   URI: 0
   perl: 5.01
-version: 0.02
+version: 0.03

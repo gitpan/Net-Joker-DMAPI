@@ -1,8 +1,9 @@
 package Net::Joker::DMAPI;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 use strict;
 use 5.010;
+use Data::Censor;
 use DateTime;
 use Hash::Merge;
 use LWP::UserAgent;
@@ -70,7 +71,9 @@ has password => (
 =item debug
 
 Whether to omit debug messages; disabled by default, set to a true value to
-enable.
+enable.  See also the C<logger> attribute to which you can provide a coderef
+which will be called with messages.  If C<debug> is true, all messages will be
+output to STDOUT as well as passed to the C<logger> coderef (if provided).
 
 =cut
 
@@ -138,6 +141,24 @@ has available_tlds_list => (
     isa => 'ArrayRef',
 );
 
+
+=item logger
+
+A coderef to be used to log interactions with Joker; if this is defined, the
+coderef provided is called with the log messages, so you can log them however
+your application usually does.
+
+The coderef will be called with two parameters - the log level (C<debug>,
+C<info>, C<error>), and the message.
+
+=cut
+
+has logger => (
+    is => 'rw',
+    isa => 'CodeRef',
+    predicate => 'has_logger',
+);
+
 has auth_sid => (
     is => 'rw',
     isa => 'Str',
@@ -165,11 +186,12 @@ sub login {
     
     # If we've already logged in, we're fine
     # TODO: do we need to test the auth-sid is still valid?
-    if (!$self->has_auth_sid) {
-        $self->_debug_output("Already have auth_sid, no need to log in");
+    if ($self->auth_sid) {
+        $self->_log(debug => "Already have auth_sid, no need to log in");
         return 1;
     }
 
+    $self->_log(info => "Logging in as " . $self->username);
     my $login_result = $self->do_request(
         'login',
         { username => $self->username, password => $self->password }
@@ -178,6 +200,7 @@ sub login {
     # If we got back an Auth-Sid: header, do_request will have 
     # $self->auth_sid with it, so check that happened - if not, login failed
     if (!$self->has_auth_sid) {
+        $self->_log(error => "Login request failed!");
         die "Login request did not return an Auth-Sid";
     }
 
@@ -185,6 +208,8 @@ sub login {
     # we can sell.  Parse it and store it for reference.
     my @tlds = split /\n/, $login_result;
     $self->available_tlds_list([sort @tlds]);
+
+    $self->_log(debug => "Login was successful");
 }
 
 
@@ -212,11 +237,16 @@ sub do_request {
     my ($self, $method, $params) = @_;
 
     my $url = $self->_form_request_url($method, $params);
-    $self->_debug_output("Calling $method - URL: $url");
+    $self->_log(
+        info => "Calling $method with params: "
+            . Data::Dump::dump(Data::Censor->clone_and_censor($params))
+    );
     my $response = $self->ua->get($url);
 
     if (!$response->is_success) {
-        die "$method request failed: " . $response->status_line;
+        my $error = "$method request failed: " . $response->status_line;
+        $self->_log( error => $error );
+        die $error;
     } else {
         my $content = $response->decoded_content;
 
@@ -229,18 +259,24 @@ sub do_request {
             $headers{$k} = $v;
         }
 
-        if ($headers{Version} ne '1.2.34') {
+        my ($dmapi_major_version) = $headers{Version} =~ /^(\d+\.\d+)\./;
+        if ($dmapi_major_version ne '1.2') {
             warn __PACKAGE__ . " $VERSION has not been tested with Joker"
                 . " DMAPI version $headers{Version}";
         }
         if ($headers{'Status-Code'} != 0) {
-            die "Joker requst failed with status " . $headers{'Status-Text'};
+            my $error = "Joker request failed with status "
+                . $headers{'Status-Text'};
+            $self->_log(error => $error);
+            die $error;
         }
 
         $self->balance($headers{'Account-Balance'});
         $self->auth_sid($headers{'Auth-Sid'}) if $headers{'Auth-Sid'};
-        $self->_debug_output("Response status " . $response->status_line);
-        $self->_debug_output("Response body: " . $content);
+        $self->_log(
+            info => "$method response status " . $response->status_line
+                . " - body: $content"
+        );
         return $body;
     };
 }
@@ -304,11 +340,19 @@ sub _form_request_url {
     return $uri->canonical;
 }
 
-# Emit debug info, if $self
-sub _debug_output {
-    my ($self, $message) = @_;
-    say "DEBUG: $message" if $self->debug;
+
+# Log stuff by calling the logger coderef if provided.
+# If debug is true, also output it to STDERR.
+sub _log {
+    my ($self, $level, $message) = @_;
+    if ($self->has_logger) {
+        $self->logger->($level, $message);
+    }
+    if ($self->debug) {
+        say "($level) $message";
+    }
 }
+    
 
 
 # Parse the format we get back from query-whois into a sensible data strucuture
@@ -382,6 +426,12 @@ sub _parse_whois_response {
 }
 
 
+# Destructor, to end session
+sub DESTROY {
+    my ($self) = @_;
+    $self->do_request('logout');
+}
+
 =back
 
 =head1 AUTHOR
@@ -405,6 +455,15 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
+
+=head1 SEE ALSO
+
+Joker's DMAPI documentation is at:
+L<https://joker.com/faq/category/39/22-dmapi.html>
+
+L<WWW::Domain::Registry::Joker> is another module for talking to Joker's DMAPI,
+but hasn't been updated for some time and doesn't provide any convenient methods
+or parsing of responses, just the basics.
 
 =cut
 
