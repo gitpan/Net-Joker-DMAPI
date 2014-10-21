@@ -1,5 +1,10 @@
 Revision history for Net-Joker-DMAPI
 
+0.04    2014-10-21
+        - Loading Data::Dump before using it helps.  I stupidly tested in an
+          environment where Data::Dump gets loaded automatically so this didn't
+          show up.
+
 0.03    2014-10-21
         - Added new logger attribute, allowing a coderef to be provided to
           receive log messages, for flexible logging however you choose.

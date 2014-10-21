@@ -19,6 +19,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Data::Censor'   => 0,
+        'Data::Dump'     => 0,
         'DateTime'       => 0,
         'Hash::Merge'    => 0,
         'LWP::UserAgent' => 0,

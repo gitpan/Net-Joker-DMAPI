@@ -1,9 +1,10 @@
 package Net::Joker::DMAPI;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use strict;
 use 5.010;
 use Data::Censor;
+use Data::Dump;
 use DateTime;
 use Hash::Merge;
 use LWP::UserAgent;
