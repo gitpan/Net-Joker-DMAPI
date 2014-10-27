@@ -23,7 +23,8 @@ requires:
   DateTime: 0
   Hash::Merge: 0
   LWP::UserAgent: 0
-  Moose: 0
+  Moo: 0
+  MooX::Types::MooseLike::Base: 0
   URI: 0
   perl: 5.01
-version: 0.04
+version: 0.05

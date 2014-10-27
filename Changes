@@ -1,5 +1,11 @@
 Revision history for Net-Joker-DMAPI
 
+0.05   2014-10-27 
+        - New account_balance method
+        - Avoid failing if calling a method with no args hashref.
+        - Check parameters passed to query_whois, croak if used wrongly
+        - Converted from Moose to Moo
+
 0.04    2014-10-21
         - Loading Data::Dump before using it helps.  I stupidly tested in an
           environment where Data::Dump gets loaded automatically so this didn't
